@@ -312,3 +312,72 @@ void ir_generator_emit_assign(IRArg dest, bool dest_is_temp, IRArg src, bool src
 
 // ... остальной код генератора будет строиться аналогично
 
+
+// Compiler/src/ir/ir_generator.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "ir_api.h"
+
+// Текущая функция, в которую идёт генерация IR
+static IRFunction *current_function = NULL;
+
+/**
+ * Начинает генерацию новой IR-функции с заданным именем.
+ * Если предыдущая функция существует — освобождает её.
+ */
+void ir_generator_start_function(const char *name) {
+    if (current_function) {
+        ir_free_function(current_function);
+    }
+    current_function = ir_create_function(name);
+    if (!current_function) {
+        fprintf(stderr, "Failed to create IR function '%s'\n", name);
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
+ * Завершает генерацию функции, выводит IR в stdout.
+ * В реальном проекте здесь можно сохранить IR или передать дальше.
+ */
+void ir_generator_finish_function() {
+    if (!current_function) return;
+
+    printf("Generated IR for function '%s':\n", current_function->name);
+    ir_function_print(current_function);
+
+    // Временно не освобождаем — функция может понадобиться дальше
+}
+
+/**
+ * Создаёт и добавляет инструкцию в текущую функцию.
+ * Полностью через API.
+ */
+void ir_generator_emit(IROpCode op, IRArg dest, bool dest_is_temp,
+                      IRArg arg1, bool arg1_is_const,
+                      IRArg arg2, bool arg2_is_const) {
+    if (!current_function) {
+        fprintf(stderr, "No current function for IR generation\n");
+        return;
+    }
+
+    IRInstruction *instr = ir_create_instruction(op, dest, dest_is_temp, arg1, arg1_is_const, arg2, arg2_is_const);
+    if (!instr) {
+        fprintf(stderr, "Failed to allocate IR instruction\n");
+        return;
+    }
+
+    if (!ir_function_add_instruction(current_function, instr)) {
+        fprintf(stderr, "Failed to add instruction to IR function\n");
+        ir_free_instruction(instr);
+    }
+}
+
+/**
+ * Пример генерации инструкции присваивания
+ */
+void ir_generator_emit_assign(IRArg dest, bool dest_is_temp, IRArg src, bool src_is_const) {
+    ir_generator_emit(IR_ASSIGN, dest, dest_is_temp, src, src_is_const, (IRArg){0}, false);
+}
