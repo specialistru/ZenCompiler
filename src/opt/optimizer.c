@@ -138,3 +138,35 @@ void optimizer_optimize(IRFunction *func, IRModule *module) {
 
     printf("Optimizations complete\n");
 }
+
+#include "optimizer.h"
+#include "dead_code_elim.h"
+#include "const_fold.h"
+#include "inlining.h"
+#include "loop_opt.h"
+#include <stdio.h>
+
+/**
+ * @brief Запуск полного цикла оптимизаций над функцией IR.
+ * Оптимизации вызываются в определённом порядке для максимальной эффективности.
+ */
+void optimizer_run(IR_Function *function) {
+    if (!function) return;
+
+    printf("Optimizer: Starting optimizations...\n");
+
+    // 1. Удаление мёртвого кода
+    dead_code_elim(function);
+
+    // 2. Свёртывание констант
+    const_fold(function);
+
+    // 3. Инлайнинг функций
+    inlining(function);
+
+    // 4. Оптимизация циклов
+    loop_opt(function);
+
+    // Итог: функция оптимизирована
+    printf("Optimizer: Optimizations completed.\n");
+}
