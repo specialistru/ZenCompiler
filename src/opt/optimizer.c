@@ -109,3 +109,32 @@ void optimizer_optimize(IRFunction *func) {
 
     printf("Optimizations complete\n");
 }
+
+
+// Compiler/src/opt/optimizer.c
+#include <stdio.h>
+#include "ir_api.h"
+
+// Объявления функций оптимизаций
+void optimizer_dead_code_elimination(IRFunction *func);
+void optimizer_const_fold(IRFunction *func);
+void optimizer_inlining(IRFunction *func, IRModule *module);
+void optimizer_loop_opt(IRFunction *func);
+
+/**
+ * Контроллер оптимизации, запускает все стадии по порядку.
+ * @param func IR-функция для оптимизации.
+ * @param module IR-модуль с доступом ко всем функциям (нужен для инлайнинга).
+ */
+void optimizer_optimize(IRFunction *func, IRModule *module) {
+    if (!func) return;
+
+    printf("Starting optimizations for function '%s'\n", func->name);
+
+    optimizer_dead_code_elimination(func);
+    optimizer_const_fold(func);
+    optimizer_inlining(func, module);
+    optimizer_loop_opt(func);
+
+    printf("Optimizations complete\n");
+}
