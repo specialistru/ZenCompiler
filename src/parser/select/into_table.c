@@ -11,6 +11,7 @@
  * Ожидается, что ключевое слово SELECT уже было прочитано.
  * Возвращает AST узел SELECT с INTO TABLE или NULL при ошибке.
  */
+
 ASTNode *parse_select_into_table(TokenStream *ts) {
     if (!ts) {
         report_error("TokenStream is NULL in parse_select_into_table");
@@ -155,4 +156,51 @@ ASTNode *parse_select_into_table(TokenStream *ts) {
     // Дополнительно можно добавить обработку WHERE и других условий
 
     return select_node;
+}
+
+
+////////////////// 
+
+
+#include "../../include/parser.h"
+#include "../../include/token.h"
+#include "../../include/ast.h"
+#include "../../include/error.h"
+#include <stdlib.h>
+#include <string.h>
+
+/**
+ * parse_select_into_table - Парсит конструкцию INTO TABLE в SELECT-запросе.
+ *
+ * Ожидается, что ключевые слова INTO TABLE уже прочитаны.
+ * Возвращает AST узел для INTO TABLE или NULL при ошибке.
+ */
+ASTNode *parse_select_into_table(TokenStream *ts) {
+    if (!ts) {
+        report_error("TokenStream is NULL in parse_select_into_table");
+        return NULL;
+    }
+
+    ASTNode *into_table_node = ast_node_create(AST_INTO_TABLE);
+    if (!into_table_node) {
+        report_error("Failed to allocate AST node for INTO TABLE");
+        return NULL;
+    }
+
+    // Ожидаем идентификатор - имя внутренней таблицы, куда записываются данные
+    Token *table_var_tok = token_stream_next(ts);
+    if (!table_var_tok || table_var_tok->type != TOKEN_IDENTIFIER) {
+        report_error("Expected identifier after INTO TABLE");
+        ast_node_free(into_table_node);
+        return NULL;
+    }
+
+    into_table_node->string_value = strdup(table_var_tok->text);
+    if (!into_table_node->string_value) {
+        report_error("Failed to allocate memory for INTO TABLE variable name");
+        ast_node_free(into_table_node);
+        return NULL;
+    }
+
+    return into_table_node;
 }
