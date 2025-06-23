@@ -62,3 +62,16 @@ int eliminate_dead_code(IRInstruction *ir, int count) {
     free(used);
     return write_idx;
 }
+
+#ifndef DEAD_CODE_ELIM_H
+#define DEAD_CODE_ELIM_H
+
+#include "../ir/ir_api.h"
+
+/**
+ * @brief Удаляет неиспользуемые инструкции и ветвления в IR.
+ * Выполняет анализ живых переменных для определения мёртвого кода.
+ */
+void dead_code_elim(IR_Function *function);
+
+#endif // DEAD_CODE_ELIM_H
