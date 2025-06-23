@@ -30,3 +30,46 @@ void ast_node_free(ASTNode *node);
 void report_error(const char *format, ...);
 
 #endif // PARSER_H
+
+
+////////////////////////
+
+
+#ifndef PARSER_H
+#define PARSER_H
+
+#include "lexer.h"
+
+// Типы узлов AST
+typedef enum {
+    AST_NODE_PROGRAM,
+    AST_NODE_STATEMENT,
+    AST_NODE_EXPRESSION,
+    AST_NODE_DECLARATION,
+    // ... другие типы узлов
+} ASTNodeType;
+
+// Структура узла AST
+typedef struct ASTNode {
+    ASTNodeType type;
+    struct ASTNode **children;
+    int child_count;
+    Token token;  // Токен, связанный с этим узлом (например, ключевое слово)
+} ASTNode;
+
+// Контекст парсера
+typedef struct {
+    Lexer *lexer;
+    Token current_token;
+} Parser;
+
+// Инициализация парсера
+void parser_init(Parser *parser, Lexer *lexer);
+
+// Разбор программы (возвращает корень AST)
+ASTNode* parser_parse_program(Parser *parser);
+
+// Освобождение памяти AST
+void parser_free_ast(ASTNode *node);
+
+#endif // PARSER_H
