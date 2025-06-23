@@ -24,3 +24,15 @@ int inline_functions(IRInstruction *ir, int count);
 
 #endif // INLINING_H
 
+#ifndef INLINING_H
+#define INLINING_H
+
+#include "../ir/ir_api.h"
+
+/**
+ * @brief Выполняет инлайнинг функций.
+ * Вставляет тело вызываемой функции в место вызова, снижая накладные расходы.
+ */
+void inlining(IR_Function *function);
+
+#endif // INLINING_H
