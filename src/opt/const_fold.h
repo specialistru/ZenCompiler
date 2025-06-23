@@ -45,3 +45,17 @@ void const_fold(IRInstruction *ir, int count);
 void const_fold(IRInstruction *ir, int count);
 
 #endif // CONST_FOLD_H
+
+#ifndef CONST_FOLD_H
+#define CONST_FOLD_H
+
+#include "../ir/ir_api.h"
+
+/**
+ * @brief Выполняет свёртывание констант в IR.
+ * Вычисляет на этапе компиляции выражения с константными операндами.
+ */
+void const_fold(IR_Function *function);
+
+#endif // CONST_FOLD_H
+
