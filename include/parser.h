@@ -1,3 +1,4 @@
+/*
 #ifndef PARSER_H
 #define PARSER_H
 
@@ -71,5 +72,50 @@ ASTNode* parser_parse_program(Parser *parser);
 
 // Освобождение памяти AST
 void parser_free_ast(ASTNode *node);
+
+#endif // PARSER_H
+*/
+
+#ifndef PARSER_H
+#define PARSER_H
+
+#include "lexer.h"
+
+// Типы узлов AST
+typedef enum {
+    AST_PROGRAM,
+    AST_STATEMENT,
+    AST_EXPRESSION,
+    AST_IF_STATEMENT,
+    AST_WHILE_LOOP,
+    AST_FUNCTION_CALL,
+    AST_ASSIGNMENT,
+    AST_LITERAL,
+    AST_IDENTIFIER,
+    // ... другие типы узлов
+} ast_node_type_t;
+
+// Абстрактный синтаксический узел
+typedef struct ast_node {
+    ast_node_type_t type;
+    struct ast_node **children;
+    int children_count;
+    token_t token; // токен, к которому привязан узел
+} ast_node_t;
+
+// Парсер
+typedef struct {
+    lexer_t *lexer;
+    token_t current_token;
+} parser_t;
+
+// Инициализация парсера
+void parser_init(parser_t *parser, lexer_t *lexer);
+
+// Основная функция парсера - парсинг программы
+ast_node_t *parser_parse_program(parser_t *parser);
+
+// Освобождение AST
+void ast_free(ast_node_t *node);
 
 #endif // PARSER_H
