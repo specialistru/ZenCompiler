@@ -182,3 +182,75 @@ ASTNode *parse_select_into_table(TokenStream *ts) {
 ---
 
 Если хотите, могу перейти к следующему файлу!
+
+////////////////////////////////
+
+Следующий файл — `parser/select/into_table.c`.
+
+---
+
+### Задача `into_table.c` (select):
+
+Парсинг конструкции `INTO TABLE` в SELECT-запросах ABAP.
+
+---
+
+## Реализация `into_table.c`
+
+```c
+#include "../../include/parser.h"
+#include "../../include/token.h"
+#include "../../include/ast.h"
+#include "../../include/error.h"
+#include <stdlib.h>
+#include <string.h>
+
+/**
+ * parse_select_into_table - Парсит конструкцию INTO TABLE в SELECT-запросе.
+ *
+ * Ожидается, что ключевые слова INTO TABLE уже прочитаны.
+ * Возвращает AST узел для INTO TABLE или NULL при ошибке.
+ */
+ASTNode *parse_select_into_table(TokenStream *ts) {
+    if (!ts) {
+        report_error("TokenStream is NULL in parse_select_into_table");
+        return NULL;
+    }
+
+    ASTNode *into_table_node = ast_node_create(AST_INTO_TABLE);
+    if (!into_table_node) {
+        report_error("Failed to allocate AST node for INTO TABLE");
+        return NULL;
+    }
+
+    // Ожидаем идентификатор - имя внутренней таблицы, куда записываются данные
+    Token *table_var_tok = token_stream_next(ts);
+    if (!table_var_tok || table_var_tok->type != TOKEN_IDENTIFIER) {
+        report_error("Expected identifier after INTO TABLE");
+        ast_node_free(into_table_node);
+        return NULL;
+    }
+
+    into_table_node->string_value = strdup(table_var_tok->text);
+    if (!into_table_node->string_value) {
+        report_error("Failed to allocate memory for INTO TABLE variable name");
+        ast_node_free(into_table_node);
+        return NULL;
+    }
+
+    return into_table_node;
+}
+```
+
+---
+
+### Объяснение:
+
+* Парсит часть запроса, которая указывает, в какую внутреннюю таблицу сохранять результат выборки.
+* Ожидается, что вызов происходит сразу после `INTO TABLE`.
+* Возвращает узел AST с именем внутренней таблицы.
+
+---
+
+Готов продолжать с следующим файлом!
+
