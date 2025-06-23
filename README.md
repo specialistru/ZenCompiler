@@ -156,6 +156,8 @@ src/
 │   │   │   ├── complex_body.c
 ```
 
+#### 📁 3.3.2. src/parser/perform/ - Модули для PERFORM
+
 ```
 │   │   ├── perform/            # Модули PERFORM
 │   │   │   ├── simple.c
@@ -170,6 +172,8 @@ src/
 │   │   │   ├── errors.c
 ```
 
+#### 📁 3.3.3. src/parser/call_function/ - Вызовы функций
+
 ```
 │   │   ├── call_function/      # Вызовы функций
 │   │   │   ├── simple.c
@@ -178,6 +182,8 @@ src/
 │   │   │   ├── bracketed.c
 │   │   │   ├── complex.c
 ```
+
+#### 📁 3.3.4. src/parser/class/ - Обработка классов
 
 ```
 │   │   ├── class/              # Обработка классов
@@ -194,6 +200,8 @@ src/
 │   │   │   ├── errors.c
 ```
 
+#### 📁 3.3.5. src/parser/method/ - Методы классов
+
 ```
 │   │   ├── method/             # Методы классов
 │   │   │   ├── definition.c
@@ -202,6 +210,8 @@ src/
 │   │   │   ├── error.c
 ```
 
+#### 📁 3.3.6. src/parser/loop/ - Циклы (DO, WHILE)
+
 ```
 │   │   ├── loop/               # Циклы (DO, WHILE)
 │   │   │   ├── loop.c
@@ -209,6 +219,8 @@ src/
 │   │   │   ├── while.c
 │   │   │   ├── other_construct.c
 ```
+
+#### 📁 3.3.7. src/parser/expression/ - Выражения и операции
 
 ```
 │   │   ├── expression/         # Выражения и операции
@@ -220,54 +232,107 @@ src/
 │   │   │   ├── function_call.c
 │   │   │   ├── ternary.c
 │   │   │   ├── conditional.c
-│   │   │   ├── assignment.c  array_access.c  logical.c  complex.c
+│   │   │   ├── assignment.c
+│   │   │   ├── array_access.c
+│   │   │   ├── logical.c
+│   │   │   ├── complex.c
 ```
+
+#### 📁 3.3.8. src/parser/assignment/ - Присваивания
 
 ```
 │   │   ├── assignment/         # Присваивания
-│   │   │   ├── simple.c  chain.c  complex.c
+│   │   │   ├── simple.c
+│   │   │   ├── chain.c
+│   │   │   ├── complex.c
 ```
+
+#### 📁 3.3.9. src/parser/form/ - Формы
 
 ```
 │   │   ├── form/               # Формы
-│   │   │   ├── simple.c  complex.c  syntax_error.c
+│   │   │   ├── simple.c
+│   │   │   ├── complex.c
+│   │   │   ├── syntax_error.c
 ```
+
+#### 📁 3.3.10. src/parser/module/ - Модули
 
 ```
 │   │   ├── module/             # Модули
-│   │   │   ├── simple.c  complex.c  chain_and_field.c
+│   │   │   ├── simple.c
+│   │   │   ├── complex.c
+│   │   │   ├── chain_and_field.c
 ```
+
+#### 📁 3.3.11. src/parser/try/ - TRY-CATCH
 
 ```
 │   │   ├── try/                # TRY-CATCH
-│   │   │   ├── simple.c  catch.c  cleanup.c  nested.c  errors.c
+│   │   │   ├── simple.c
+│   │   │   ├── catch.c
+│   │   │   ├── cleanup.c
+│   │   │   ├── nested.c
+│   │   │   ├── errors.c
 ```
+
+#### 📁 3.3.12. src/parser/select/ - SQL SELECT и связанные
 
 ```
 │   │   ├── select/             # SQL SELECT и связанные
-│   │   │   ├── simple.c  into_table.c  join.c  where.c  endselect.c
+│   │   │   ├── simple.c
+│   │   │   ├── into_table.c
+│   │   │   ├── join.c
+│   │   │   ├── where.c
+│   │   │   ├── endselect.c
 ```
+
+#### 📁 3.3.13. src/parser/table_ops/ - Операции с таблицами
 
 ```
 │   │   ├── table_ops/          # Операции с таблицами
-│   │   │   ├── append.c  insert.c  delete.c  modify.c  read.c  sort.c
+│   │   │   ├── append.c
+│   │   │   ├── insert.c
+│   │   │   ├── delete.c
+│   │   │   ├── modify.c
+│   │   │   ├── read.c
+│   │   │   ├── sort.c
 ```
+
+#### 📁 3.3.14. src/parser/declarations/ - Объявления переменных и типов
 
 ```
 │   │   ├── declarations/       # Объявления переменных и типов
-│   │   │   ├── data.c  constants.c  parameters.c  types.c
-│   │   │   ├── field_symbols.c  select_options.c  ranges.c
+│   │   │   ├── data.c
+│   │   │   ├── constants.c
+│   │   │   ├── parameters.c
+│   │   │   ├── types.c
+│   │   │   ├── field_symbols.c
+│   │   │   ├── select_options.c
+│   │   │   ├── ranges.c
 ```
+
+#### 📁 3.3.15. src/parser/declarations/ - Управляющие конструкции (EXIT, CONTINUE)
 
 ```
 │   │   ├── control/            # Управляющие конструкции (EXIT, CONTINUE)
-│   │   │   ├── exit.c  continue.c  check.c  return.c  auth_check.c
+│   │   │   ├── exit.c
+│   │   │   ├── continue.c
+│   │   │   ├── check.c
+│   │   │   ├── return.c
+│   │   │   ├── auth_check.c
 ```
+
+#### 📁 3.3.16. src/parser/declarations/ - Специальные конструкции (MESSAGE, AUTH_CHECK)
 
 ```
 │   │   ├── special/            # Специальные конструкции (MESSAGE, AUTH_CHECK)
-│   │   │   ├── export_import.c  memory_id.c  set_get_parameter.c
-│   │   │   ├── free_create_object.c  authority_check.c  message.c
+│   │   │   ├── export_import.c
+│   │   │   ├── memory_id.c
+│   │   │   ├── set_get_parameter.c
+│   │   │   ├── free_create_object.c
+│   │   │   ├── authority_check.c
+│   │   │   ├── message.c
 ```
 
 #### 📁 3.4. src/semantic/ - Семантический анализ
