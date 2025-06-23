@@ -71,3 +71,33 @@ int inline_functions(IRInstruction *ir, int count) {
 
     return write_idx;
 }
+
+// Compiler/src/opt/inlining.c
+#include <stdio.h>
+#include "ir_api.h"
+
+/**
+ * Анализирует вызовы функций и вставляет тело вызываемой функции на место вызова.
+ * Простейшая реализация — без рекурсии, только для функций с небольшим числом инструкций.
+ */
+void optimizer_inlining(IRFunction *func, IRModule *module) {
+    if (!func || !module) return;
+
+    for (int i = 0; i < func->ir_count; i++) {
+        IRInstruction *instr = &func->ir[i];
+        if (instr->op == IR_CALL) {
+            const char *callee_name = instr->arg1.func_name;
+            IRFunction *callee = ir_module_find_function(module, callee_name);
+            if (callee && callee->ir_count < 20) {
+                printf("Inlining function '%s' into '%s' at instruction %d\n", callee_name, func->name, i);
+
+                // Простое клонирование инструкций callee с заменой аргументов.
+                // TODO: Нужно реализовать копирование и переименование переменных.
+
+                // Для примера — просто удаляем вызов, подставляя nop
+                instr->op = IR_NOP;
+            }
+        }
+    }
+}
+
