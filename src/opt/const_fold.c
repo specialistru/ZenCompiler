@@ -115,3 +115,80 @@ void const_fold(IRInstruction *ir, int count) {
         }
     }
 }
+
+
+// Compiler/src/opt/const_fold.c
+#include <stdio.h>
+#include "ir_api.h"
+
+/**
+ * Проверяет, является ли операция арифметической бинарной операцией,
+ * для которой можно выполнить свёртывание констант.
+ */
+static bool is_foldable_op(IROpCode op) {
+    switch(op) {
+        case IR_ADD:
+        case IR_SUB:
+        case IR_MUL:
+        case IR_DIV:
+        case IR_MOD:
+        case IR_AND:
+        case IR_OR:
+        case IR_XOR:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/**
+ * Выполняет свёртывание констант для заданной инструкции, если оба аргумента — константы.
+ * Заменяет инструкцию на присваивание с вычисленным значением.
+ */
+static bool try_fold_constants(IRInstruction *instr) {
+    if (!is_foldable_op(instr->op)) return false;
+    if (!instr->arg1_is_const || !instr->arg2_is_const) return false;
+
+    int64_t val1 = instr->arg1.value;
+    int64_t val2 = instr->arg2.value;
+    int64_t result = 0;
+
+    switch (instr->op) {
+        case IR_ADD: result = val1 + val2; break;
+        case IR_SUB: result = val1 - val2; break;
+        case IR_MUL: result = val1 * val2; break;
+        case IR_DIV:
+            if (val2 == 0) return false; // защита от деления на 0
+            result = val1 / val2;
+            break;
+        case IR_MOD:
+            if (val2 == 0) return false;
+            result = val1 % val2;
+            break;
+        case IR_AND: result = val1 & val2; break;
+        case IR_OR:  result = val1 | val2; break;
+        case IR_XOR: result = val1 ^ val2; break;
+        default: return false;
+    }
+
+    // Замена инструкции на присваивание константы
+    instr->op = IR_ASSIGN;
+    instr->arg1.value = result;
+    instr->arg1_is_const = true;
+    instr->arg2_is_const = false;  // второй аргумент не нужен
+    return true;
+}
+
+/**
+ * Основная функция свёртывания констант в IR-функции.
+ */
+void optimizer_const_fold(IRFunction *func) {
+    if (!func) return;
+
+    for (int i = 0; i < func->ir_count; i++) {
+        IRInstruction *instr = &func->ir[i];
+        if (try_fold_constants(instr)) {
+            printf("Const folded instruction at %d in function %s\n", i, func->name);
+        }
+    }
+}
