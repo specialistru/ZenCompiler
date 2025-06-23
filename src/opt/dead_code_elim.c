@@ -63,15 +63,35 @@ int eliminate_dead_code(IRInstruction *ir, int count) {
     return write_idx;
 }
 
-#ifndef DEAD_CODE_ELIM_H
-#define DEAD_CODE_ELIM_H
 
-#include "../ir/ir_api.h"
+#include "dead_code_elim.h"
+#include <stdbool.h>
+#include <stdio.h>
 
 /**
- * @brief Удаляет неиспользуемые инструкции и ветвления в IR.
- * Выполняет анализ живых переменных для определения мёртвого кода.
+ * @brief Основной алгоритм удаления мёртвого кода.
+ * Анализирует инструкции и удаляет те, что не влияют на результат.
  */
-void dead_code_elim(IR_Function *function);
+void dead_code_elim(IR_Function *function) {
+    if (!function) return;
 
-#endif // DEAD_CODE_ELIM_H
+    printf("Dead Code Elimination: Analyzing function %s\n", function->name);
+
+    bool changed = true;
+
+    while (changed) {
+        changed = false;
+
+        for (int i = 0; i < function->instructions_count; i++) {
+            IR_Instruction *instr = &function->instructions[i];
+
+            if (!instr->used && !instr->has_side_effects) {
+                // Удаляем инструкцию
+                // Реально здесь нужно аккуратно сдвигать массив, обновлять индексы и зависимости
+                instr->opcode = IR_NOP;
+                changed = true;
+                printf("Removed dead instruction at index %d\n", i);
+            }
+        }
+    }
+}
