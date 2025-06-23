@@ -211,3 +211,140 @@ ASTNode *parse_select_join(TokenStream *ts) {
 ---
 
 Если нужно — могу перейти к следующему файлу!
+
+/////////////////////////////
+
+Следующий файл — `parser/select/join.c`.
+
+---
+
+### Задача `join.c` (select):
+
+Парсинг JOIN-конструкций в SELECT-запросах ABAP.
+
+---
+
+## Реализация `join.c`
+
+```c
+#include "../../include/parser.h"
+#include "../../include/token.h"
+#include "../../include/ast.h"
+#include "../../include/error.h"
+#include <stdlib.h>
+#include <string.h>
+
+/**
+ * parse_select_join - Парсит JOIN-часть SELECT-запроса.
+ *
+ * Ожидается, что ключевое слово JOIN уже прочитано.
+ * Возвращает AST узел JOIN или NULL при ошибке.
+ */
+ASTNode *parse_select_join(TokenStream *ts) {
+    if (!ts) {
+        report_error("TokenStream is NULL in parse_select_join");
+        return NULL;
+    }
+
+    ASTNode *join_node = ast_node_create(AST_JOIN);
+    if (!join_node) {
+        report_error("Failed to allocate AST node for JOIN");
+        return NULL;
+    }
+
+    // Ожидаем тип JOIN (INNER, LEFT OUTER, RIGHT OUTER и т.д.) — упрощаем как идентификатор
+    Token *join_type_tok = token_stream_next(ts);
+    if (!join_type_tok || join_type_tok->type != TOKEN_IDENTIFIER) {
+        report_error("Expected JOIN type identifier");
+        ast_node_free(join_node);
+        return NULL;
+    }
+    join_node->string_value = strdup(join_type_tok->text);
+    if (!join_node->string_value) {
+        report_error("Failed to allocate memory for JOIN type");
+        ast_node_free(join_node);
+        return NULL;
+    }
+
+    // Ожидаем имя таблицы после типа JOIN
+    Token *table_tok = token_stream_next(ts);
+    if (!table_tok || table_tok->type != TOKEN_IDENTIFIER) {
+        report_error("Expected table name after JOIN type");
+        ast_node_free(join_node);
+        return NULL;
+    }
+
+    ASTNode *table_node = ast_node_create(AST_TABLE);
+    if (!table_node) {
+        report_error("Failed to allocate AST node for JOIN table");
+        ast_node_free(join_node);
+        return NULL;
+    }
+    table_node->string_value = strdup(table_tok->text);
+    if (!table_node->string_value) {
+        report_error("Failed to allocate memory for JOIN table name");
+        ast_node_free(join_node);
+        ast_node_free(table_node);
+        return NULL;
+    }
+    ast_node_add_child(join_node, table_node);
+
+    // Ожидаем ON ключевое слово
+    Token *on_tok = token_stream_next(ts);
+    if (!on_tok || on_tok->type != TOKEN_ON) {
+        report_error("Expected ON keyword in JOIN clause");
+        ast_node_free(join_node);
+        return NULL;
+    }
+
+    // Парсим условие соединения — упрощённо как последовательность токенов до следующего ключевого слова
+    ASTNode *on_condition = ast_node_create(AST_ON_CONDITION);
+    if (!on_condition) {
+        report_error("Failed to allocate AST node for ON condition");
+        ast_node_free(join_node);
+        return NULL;
+    }
+
+    Token *tok = NULL;
+    while ((tok = token_stream_peek(ts)) != NULL &&
+           tok->type != TOKEN_WHERE &&
+           tok->type != TOKEN_FROM &&
+           tok->type != TOKEN_SEMICOLON &&
+           tok->type != TOKEN_JOIN &&
+           tok->type != TOKEN_ENDSELECT) {
+        tok = token_stream_next(ts);
+        ASTNode *expr_node = ast_node_create(AST_EXPRESSION_TOKEN);
+        if (!expr_node) {
+            report_error("Failed to allocate AST node for expression token");
+            ast_node_free(join_node);
+            ast_node_free(on_condition);
+            return NULL;
+        }
+        expr_node->string_value = strdup(tok->text);
+        if (!expr_node->string_value) {
+            report_error("Failed to allocate memory for token text");
+            ast_node_free(join_node);
+            ast_node_free(on_condition);
+            ast_node_free(expr_node);
+            return NULL;
+        }
+        ast_node_add_child(on_condition, expr_node);
+    }
+
+    ast_node_add_child(join_node, on_condition);
+    return join_node;
+}
+```
+
+---
+
+### Объяснение:
+
+* Парсит JOIN с типом, таблицей и условием ON.
+* Создаёт узлы AST для типа JOIN, таблицы и условия соединения.
+* Упрощённый разбор условия ON — можно расширять.
+
+---
+
+Готов продолжать с следующим файлом!
+
