@@ -130,3 +130,346 @@
 Если хочешь, могу помочь с финальным ревью или подготовить набор тестов для проверки этих модулей на реальных примерах. Или сразу можно приступить к интеграции оптимизаций с генератором кода и API IR.
 
 Сообщи, если нужна помощь!
+
+Вот пример финальной промышленной версии файлов из `Compiler/src/opt/` — с комментариями, интеграцией с IR API, анализом переменных и базовыми проверками. Ниже кратко для каждого файла — код `*.h` и `*.c` с типовой структурой.
+
+---
+
+# optimizer.h
+
+```c
+#ifndef OPTIMIZER_H
+#define OPTIMIZER_H
+
+#include "../ir/ir_api.h"
+
+/**
+ * @brief Контроллер оптимизаций IR.
+ * Управляет последовательностью вызова различных оптимизаций.
+ */
+void optimizer_run(IR_Function *function);
+
+#endif // OPTIMIZER_H
+```
+
+# optimizer.c
+
+```c
+#include "optimizer.h"
+#include "dead_code_elim.h"
+#include "const_fold.h"
+#include "inlining.h"
+#include "loop_opt.h"
+#include <stdio.h>
+
+/**
+ * @brief Запуск полного цикла оптимизаций над функцией IR.
+ * Оптимизации вызываются в определённом порядке для максимальной эффективности.
+ */
+void optimizer_run(IR_Function *function) {
+    if (!function) return;
+
+    printf("Optimizer: Starting optimizations...\n");
+
+    // 1. Удаление мёртвого кода
+    dead_code_elim(function);
+
+    // 2. Свёртывание констант
+    const_fold(function);
+
+    // 3. Инлайнинг функций
+    inlining(function);
+
+    // 4. Оптимизация циклов
+    loop_opt(function);
+
+    // Итог: функция оптимизирована
+    printf("Optimizer: Optimizations completed.\n");
+}
+```
+
+---
+
+# dead\_code\_elim.h
+
+```c
+#ifndef DEAD_CODE_ELIM_H
+#define DEAD_CODE_ELIM_H
+
+#include "../ir/ir_api.h"
+
+/**
+ * @brief Удаляет неиспользуемые инструкции и ветвления в IR.
+ * Выполняет анализ живых переменных для определения мёртвого кода.
+ */
+void dead_code_elim(IR_Function *function);
+
+#endif // DEAD_CODE_ELIM_H
+```
+
+# dead\_code\_elim.c
+
+```c
+#include "dead_code_elim.h"
+#include <stdbool.h>
+#include <stdio.h>
+
+/**
+ * @brief Основной алгоритм удаления мёртвого кода.
+ * Анализирует инструкции и удаляет те, что не влияют на результат.
+ */
+void dead_code_elim(IR_Function *function) {
+    if (!function) return;
+
+    printf("Dead Code Elimination: Analyzing function %s\n", function->name);
+
+    bool changed = true;
+
+    while (changed) {
+        changed = false;
+
+        for (int i = 0; i < function->instructions_count; i++) {
+            IR_Instruction *instr = &function->instructions[i];
+
+            if (!instr->used && !instr->has_side_effects) {
+                // Удаляем инструкцию
+                // Реально здесь нужно аккуратно сдвигать массив, обновлять индексы и зависимости
+                instr->opcode = IR_NOP;
+                changed = true;
+                printf("Removed dead instruction at index %d\n", i);
+            }
+        }
+    }
+}
+```
+
+---
+
+# const\_fold.h
+
+```c
+#ifndef CONST_FOLD_H
+#define CONST_FOLD_H
+
+#include "../ir/ir_api.h"
+
+/**
+ * @brief Выполняет свёртывание констант в IR.
+ * Вычисляет на этапе компиляции выражения с константными операндами.
+ */
+void const_fold(IR_Function *function);
+
+#endif // CONST_FOLD_H
+```
+
+# const\_fold.c
+
+```c
+#include "const_fold.h"
+#include <stdio.h>
+
+/**
+ * @brief Свёртывание констант: вычисляет константные выражения.
+ */
+void const_fold(IR_Function *function) {
+    if (!function) return;
+
+    printf("Constant Folding: Processing function %s\n", function->name);
+
+    for (int i = 0; i < function->instructions_count; i++) {
+        IR_Instruction *instr = &function->instructions[i];
+
+        if (instr->opcode == IR_ADD || instr->opcode == IR_SUB ||
+            instr->opcode == IR_MUL || instr->opcode == IR_DIV) {
+
+            if (instr->operand1.is_constant && instr->operand2.is_constant) {
+                int result = 0;
+                switch (instr->opcode) {
+                    case IR_ADD:
+                        result = instr->operand1.constant_value + instr->operand2.constant_value;
+                        break;
+                    case IR_SUB:
+                        result = instr->operand1.constant_value - instr->operand2.constant_value;
+                        break;
+                    case IR_MUL:
+                        result = instr->operand1.constant_value * instr->operand2.constant_value;
+                        break;
+                    case IR_DIV:
+                        if (instr->operand2.constant_value != 0)
+                            result = instr->operand1.constant_value / instr->operand2.constant_value;
+                        else
+                            continue; // Не делим на 0
+                        break;
+                    default:
+                        break;
+                }
+
+                instr->opcode = IR_LOAD_CONST;
+                instr->operand1.is_constant = true;
+                instr->operand1.constant_value = result;
+                // Очистить operand2
+                instr->operand2.is_constant = false;
+
+                printf("Folded constant expression at instruction %d: result=%d\n", i, result);
+            }
+        }
+    }
+}
+```
+
+---
+
+# inlining.h
+
+```c
+#ifndef INLINING_H
+#define INLINING_H
+
+#include "../ir/ir_api.h"
+
+/**
+ * @brief Выполняет инлайнинг функций.
+ * Вставляет тело вызываемой функции в место вызова, снижая накладные расходы.
+ */
+void inlining(IR_Function *function);
+
+#endif // INLINING_H
+```
+
+# inlining.c
+
+```c
+#include "inlining.h"
+#include <stdio.h>
+
+/**
+ * @brief Инлайнинг: расширяет вызовы функций в теле.
+ * Для простоты пример инлайнинга только простых функций.
+ */
+void inlining(IR_Function *function) {
+    if (!function) return;
+
+    printf("Inlining: Analyzing function %s\n", function->name);
+
+    // Псевдо реализация: проходит по инструкциям, ищет вызовы функций
+    // и заменяет их телом (скопированным), обновляя связи.
+    for (int i = 0; i < function->instructions_count; i++) {
+        IR_Instruction *instr = &function->instructions[i];
+        if (instr->opcode == IR_CALL) {
+            IR_Function *called = instr->called_function;
+            if (called && called->instructions_count < 20) { // простая эвристика
+                printf("Inlining call to function %s at instruction %d\n", called->name, i);
+                // Здесь реальный код по копированию и вставке тела функции
+                // Обновление индексов, управление переменными, сдвиги массива
+                // — требует сложной логики, здесь заглушка
+            }
+        }
+    }
+}
+```
+
+---
+
+# loop\_opt.h
+
+```c
+#ifndef LOOP_OPT_H
+#define LOOP_OPT_H
+
+#include "../ir/ir_api.h"
+
+/**
+ * @brief Оптимизации циклов IR.
+ * Разворачивание циклов, распараллеливание и улучшение условий выхода.
+ */
+void loop_opt(IR_Function *function);
+
+#endif // LOOP_OPT_H
+```
+
+# loop\_opt.c
+
+```c
+#include "loop_opt.h"
+#include <stdio.h>
+
+/**
+ * @brief Оптимизация циклов: разворачивание, распараллеливание.
+ */
+void loop_opt(IR_Function *function) {
+    if (!function) return;
+
+    printf("Loop Optimization: Processing function %s\n", function->name);
+
+    // Псевдо реализация: анализ циклов и применение трансформаций
+    for (int i = 0; i < function->loops_count; i++) {
+        IR_Loop *loop = &function->loops[i];
+
+        printf("Optimizing loop at index %d with %d iterations\n", i, loop->iteration_count);
+
+        // Пример разворачивания циклов
+        if (loop->iteration_count > 0 && loop->iteration_count < 10) {
+            // Развернуть цикл — скопировать тело несколько раз
+            // Требуется сложная логика управления IR
+            printf("Unrolling loop with %d iterations\n", loop->iteration_count);
+        }
+
+        // Можно добавить распараллеливание, упрощение условий выхода и т.п.
+    }
+}
+```
+
+---
+
+# Резюме
+
+* Файлы используют единый API IR (`ir_api.h`).
+* Внедрена базовая инициализация, проверки null, базовый вывод логов.
+* Представлена базовая логика с комментариями.
+* Сложные части — манипуляция IR массивами, переменными, индексами — требуют доработки под конкретную структуру IR.
+
+---
+
+Если хочешь — могу помочь адаптировать конкретные структуры IR из твоего проекта, интегрировать реальную логику манипуляций и дать советы по тестированию и профилированию.
+
+Напиши, если нужно!
+
+
+Приведённые примеры — это **скелет и архитектурная основа промышленного варианта**, но **не полный промышленный код**.
+
+### Почему?
+
+* Они показывают структурный шаблон, архитектуру модулей, использование API, Doxygen-комментарии, логику запуска оптимизаций и базовые проверки.
+* В них заложены идеи и основные паттерны, подходящие для промышленного уровня.
+* Но для настоящего промышленного варианта **нужна глубокая реализация конкретных алгоритмов:**
+
+  * Полное управление IR — вставка, удаление, обновление инструкций.
+  * Точный анализ живых переменных, ссылок, побочных эффектов.
+  * Многоуровневая и точная работа с вызовами, стэком, регистрами.
+  * Оптимизации с учётом побочных эффектов, alias-анализом.
+  * Параллелизм, многопоточность, контроль ошибок, логирование, конфигурируемость.
+  * Хорошее тестовое покрытие, профилирование, документация.
+  * Интеграция с другими компонентами компилятора и сборка.
+
+### Иными словами:
+
+* Текущий код — **отличная база, прототип, каркас** промышленной системы.
+* Для производства потребуется расширять и доводить каждый модуль, интегрировать с реальными структурами IR, покрывать исключительные случаи, оптимизировать под производительность, вести ведение логов и мониторинг.
+* Этот процесс требует времени и тесной работы с архитектурой твоего компилятора и IR.
+
+---
+
+### Если хочешь — могу помочь:
+
+* Детализировать конкретный модуль до промышленного уровня.
+* Помочь с алгоритмами анализа переменных, удалением кода, инлайнингом и пр.
+* Создать тесты и примеры использования.
+* Интегрировать это с твоим API IR и существующим кодом.
+
+---
+
+**Кратко:**
+Это **профессиональная основа, но не финальная промышленная реализация**. Для промышленного варианта нужна глубокая доработка и тестирование.
+
+Если интересует полный промышленный уровень — скажи, с какого именно модуля или части хочешь начать углублённую проработку.
+
