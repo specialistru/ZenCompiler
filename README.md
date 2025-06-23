@@ -123,11 +123,14 @@
 
 ### 📁 5. examples/ — Примеры ABAP-программ
 
-* hello\_world.abap
-* nested\_if.abap
-* loop\_select.abap
-* classes.abap
-* и др. для демонстрации возможностей компилятора
+```
+examples/
+├── hello_world.abap        # 
+├── nested_if.abap          #
+├── loop_select.abap        #
+├── classes.abap            #
+├── и др. для демонстрации возможностей компилятора
+```
 
 ### 📁 6. docs/ — Документация
 
@@ -532,15 +535,6 @@ tests/
 
 ---
 
-#### 📁 `examples/`
-
-```
-examples/
-├── hello_world.abap
-├── nested_if.abap
-├── loop_select.abap
-├── classes.abap
-```
 
 ---
 
