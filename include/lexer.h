@@ -1,3 +1,4 @@
+/*
 #ifndef LEXER_H
 #define LEXER_H
 
@@ -61,5 +62,51 @@ void lexer_init(Lexer *lexer, const char *source);
 
 // Получение следующего токена
 Token lexer_next_token(Lexer *lexer);
+
+#endif // LEXER_H
+
+*/
+
+#ifndef LEXER_H
+#define LEXER_H
+
+#include <stdbool.h>
+
+// Типы токенов (пример, полный список в token.h)
+typedef enum {
+    TOKEN_EOF,
+    TOKEN_IDENTIFIER,
+    TOKEN_KEYWORD,
+    TOKEN_NUMBER,
+    TOKEN_STRING,
+    TOKEN_OPERATOR,
+    TOKEN_COMMENT,
+    TOKEN_UNKNOWN,
+} token_type_t;
+
+// Структура токена
+typedef struct {
+    token_type_t type;
+    char *lexeme;       // Слово/текст токена (динамически выделяется)
+    int line;           // Номер строки в исходнике
+    int column;         // Колонка начала токена
+} token_t;
+
+// Лексер - структура состояния лексического анализатора
+typedef struct {
+    const char *source; // Указатель на исходный текст программы
+    int pos;            // Текущая позиция в source
+    int line;           // Текущая строка
+    int column;         // Текущая колонка
+} lexer_t;
+
+// Инициализация лексера
+void lexer_init(lexer_t *lexer, const char *source);
+
+// Получить следующий токен из исходного текста
+token_t lexer_next_token(lexer_t *lexer);
+
+// Освободить память, выделенную под токен
+void token_free(token_t *token);
 
 #endif // LEXER_H
