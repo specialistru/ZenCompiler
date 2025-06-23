@@ -101,3 +101,30 @@ void optimizer_inlining(IRFunction *func, IRModule *module) {
     }
 }
 
+#include "inlining.h"
+#include <stdio.h>
+
+/**
+ * @brief Инлайнинг: расширяет вызовы функций в теле.
+ * Для простоты пример инлайнинга только простых функций.
+ */
+void inlining(IR_Function *function) {
+    if (!function) return;
+
+    printf("Inlining: Analyzing function %s\n", function->name);
+
+    // Псевдо реализация: проходит по инструкциям, ищет вызовы функций
+    // и заменяет их телом (скопированным), обновляя связи.
+    for (int i = 0; i < function->instructions_count; i++) {
+        IR_Instruction *instr = &function->instructions[i];
+        if (instr->opcode == IR_CALL) {
+            IR_Function *called = instr->called_function;
+            if (called && called->instructions_count < 20) { // простая эвристика
+                printf("Inlining call to function %s at instruction %d\n", called->name, i);
+                // Здесь реальный код по копированию и вставке тела функции
+                // Обновление индексов, управление переменными, сдвиги массива
+                // — требует сложной логики, здесь заглушка
+            }
+        }
+    }
+}
