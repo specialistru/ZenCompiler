@@ -107,12 +107,19 @@
 │   ├── exceptions.c        # TRY-CATCH и обработка исключений
 │   ├── threads.c           # Потоки и синхронизация
 │
-├── tools/                  # Инструменты разработки
-│   ├── debugger.c          # Отладчик, брейкпоинты
-│   ├── profiler.c          # Профайлер исполнения IR
-│   ├── logger.c            # Логирование событий и ошибок
-│   ├── trace.c             # Трассировка IR для отладки
+
+
+#### 📁 3. src/tools/ — Инструменты разработчика
+
 ```
+tools/
+├── debugger.c              # Пошаговое выполнение, Отладчик, брейкпоинты
+├── profiler.c              # Сбор статистики по IR. Профайлер исполнения IR.
+├── logger.c                # Логирование событий и ошибок
+├── trace.c                 # Подробная трассировка IR для отладки
+```
+
+
 
 ### 📁 4. tests/ — Тесты
 
@@ -120,6 +127,19 @@
 * Интеграционные тесты на примерах ABAP-кода из папки examples/
 * Регрессионные тесты для ключевых сценариев (tests/regression/)
 * Автоматизированное покрытие тестами и CI
+
+```
+tests/
+├── lexer_test.c
+├── parser_test.c
+├── semantic_test.c
+├── ir_test.c
+├── vm_test.c
+├── regression/
+│   ├── test_if.abap
+│   ├── test_perform.abap
+│   ├── test_sql.abap
+```
 
 ### 📁 5. examples/ — Примеры ABAP-программ
 
@@ -150,6 +170,33 @@ docs/
 * Сборка проекта (Makefile, CMakeLists.txt, shell-скрипты)
 * Анализ кода (статический анализ, форматирование)
 * CI/CD — запуск тестов, деплой
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -503,41 +550,6 @@ runtime/
 ├── exceptions.c            # Исключения, TRY-CATCH
 ├── threads.c               # Параллелизм, блокировки
 ```
-
----
-
-#### 📁 `src/tools/` — Инструменты разработчика
-
-```
-tools/
-├── debugger.c              # Пошаговое выполнение, breakpoints
-├── profiler.c              # Сбор статистики по IR
-├── logger.c                # Логирование событий
-├── trace.c                 # Подробная трассировка IR
-```
-
----
-
-#### 📁 `tests/` — Тесты
-
-```
-tests/
-├── lexer_test.c
-├── parser_test.c
-├── semantic_test.c
-├── ir_test.c
-├── vm_test.c
-├── regression/
-│   ├── test_if.abap
-│   ├── test_perform.abap
-│   ├── test_sql.abap
-```
-
----
-
-
----
-
 
 
 ---
