@@ -145,15 +145,12 @@ src/
 │   │   │   ├── elseif.c
 │   │   │   ├── else.c
 │   │   │   ├── endif.c
-
 │   │   │   ├── logical_ops.c
 │   │   │   ├── not.c
 │   │   │   ├── bracketed.c
 │   │   │   ├── errors.c
-
 │   │   │   ├── multilevel_elseif_else.c
 │   │   │   ├── deep_elseif.c
-
 │   │   │   ├── complex_conditions.c
 │   │   │   ├── body.c
 │   │   │   ├── complex_body.c
@@ -161,36 +158,68 @@ src/
 
 ```
 │   │   ├── perform/            # Модули PERFORM
-│   │   │   ├── simple.c  nested.c  logical_ops.c  and_or.c
-│   │   │   ├── not.c  elseif.c  else.c  bracketed.c  complex.c  errors.c
+│   │   │   ├── simple.c
+│   │   │   ├── nested.c
+│   │   │   ├── logical_ops.c
+│   │   │   ├── and_or.c
+│   │   │   ├── not.c
+│   │   │   ├── elseif.c
+│   │   │   ├── else.c
+│   │   │   ├── bracketed.c
+│   │   │   ├── complex.c
+│   │   │   ├── errors.c
 ```
 
 ```
-│   │   ├── call_function//      # Вызовы функций
-│   │   │   ├── simple.c  dynamic.c  exceptions.c  bracketed.c  complex.c
+│   │   ├── call_function/      # Вызовы функций
+│   │   │   ├── simple.c
+│   │   │   ├── dynamic.c
+│   │   │   ├── exceptions.c
+│   │   │   ├── bracketed.c
+│   │   │   ├── complex.c
 ```
 
 ```
 │   │   ├── class/              # Обработка классов
-│   │   │   ├── def.c  attributes.c  interface.c  method_def.c
-│   │   │   ├── method_impl.c  simple.c  visibility.c  implementation.c
-│   │   │   ├── endinterface.c  endclass.c  errors.c
+│   │   │   ├── def.c
+│   │   │   ├── attributes.c
+│   │   │   ├── interface.c
+│   │   │   ├── method_def.c
+│   │   │   ├── method_impl.c
+│   │   │   ├── simple.c
+│   │   │   ├── visibility.c
+│   │   │   ├── implementation.c
+│   │   │   ├── endinterface.c
+│   │   │   ├── endclass.c
+│   │   │   ├── errors.c
 ```
 
 ```
 │   │   ├── method/             # Методы классов
-│   │   │   ├── definition.c  implementation.c  visibility.c  error.c
+│   │   │   ├── definition.c
+│   │   │   ├── implementation.c
+│   │   │   ├── visibility.c
+│   │   │   ├── error.c
 ```
 
 ```
 │   │   ├── loop/               # Циклы (DO, WHILE)
-│   │   │   ├── loop.c  do.c  while.c  other_construct.c
+│   │   │   ├── loop.c
+│   │   │   ├── do.c
+│   │   │   ├── while.c
+│   │   │   ├── other_construct.c
 ```
 
 ```
 │   │   ├── expression/         # Выражения и операции
-│   │   │   ├── literal.c  identifier.c  operator.c  variable.c
-│   │   │   ├── bracket.c  function_call.c  ternary.c  conditional.c
+│   │   │   ├── literal.c
+│   │   │   ├── identifier.c
+│   │   │   ├── operator.c
+│   │   │   ├── variable.c
+│   │   │   ├── bracket.c
+│   │   │   ├── function_call.c
+│   │   │   ├── ternary.c
+│   │   │   ├── conditional.c
 │   │   │   ├── assignment.c  array_access.c  logical.c  complex.c
 ```
 
