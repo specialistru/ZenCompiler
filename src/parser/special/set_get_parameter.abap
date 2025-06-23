@@ -1,0 +1,2 @@
+SET PARAMETER ID 'ABC' FIELD lv_value.
+GET PARAMETER ID 'ABC' FIELD lv_value.
