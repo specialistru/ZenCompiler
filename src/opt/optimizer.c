@@ -55,3 +55,57 @@ void optimizer_dead_code_elimination(IRFunction *func) {
 }
 
 // Другие оптимизации подключаются аналогично, все работают с IRFunction и IRInstruction
+
+// Compiler/src/opt/optimizer.c
+#include <stdio.h>
+#include <stdbool.h>
+
+#include "ir_api.h"
+
+/**
+ * Пример простейшей оптимизации — удаление мёртвого кода.
+ * Очень упрощённая версия, на практике надо делать анализ использования.
+ * @param func IR-функция для оптимизации.
+ */
+void optimizer_dead_code_elimination(IRFunction *func) {
+    if (!func) return;
+
+    for (int i = 0; i < func->ir_count; /* i увеличиваем внутри */) {
+        IRInstruction *instr = &func->ir[i];
+
+        // Заглушка для анализа — считаем, что инструкция с пустым dest мертва
+        bool is_dead = (instr->dest_is_temp == false && instr->dest.value == 0);
+
+        if (is_dead) {
+            // Удаляем инструкцию — сдвигаем массив
+            for (int j = i; j < func->ir_count - 1; j++) {
+                func->ir[j] = func->ir[j + 1];
+            }
+            func->ir_count--;
+            // i не увеличиваем, т.к. сдвинули
+        } else {
+            i++;
+        }
+    }
+}
+
+/**
+ * Основной контроллер оптимизаций.
+ * Вызывает поочерёдно оптимизации.
+ * @param func IR-функция.
+ */
+void optimizer_optimize(IRFunction *func) {
+    if (!func) return;
+
+    printf("Starting optimizations for function '%s'\n", func->name);
+
+    optimizer_dead_code_elimination(func);
+
+    // Здесь могут быть вызовы других оптимизаций:
+    // optimizer_const_fold(func);
+    // optimizer_inlining(func);
+    // optimizer_loop_opt(func);
+    // и т.д.
+
+    printf("Optimizations complete\n");
+}
