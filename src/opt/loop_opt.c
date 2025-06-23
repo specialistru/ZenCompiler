@@ -71,3 +71,32 @@ void optimizer_loop_opt(IRFunction *func) {
 
     // TODO: Добавить распараллеливание, оптимизацию условий выхода
 }
+
+#include "loop_opt.h"
+#include <stdio.h>
+
+/**
+ * @brief Оптимизация циклов: разворачивание, распараллеливание.
+ */
+void loop_opt(IR_Function *function) {
+    if (!function) return;
+
+    printf("Loop Optimization: Processing function %s\n", function->name);
+
+    // Псевдо реализация: анализ циклов и применение трансформаций
+    for (int i = 0; i < function->loops_count; i++) {
+        IR_Loop *loop = &function->loops[i];
+
+        printf("Optimizing loop at index %d with %d iterations\n", i, loop->iteration_count);
+
+        // Пример разворачивания циклов
+        if (loop->iteration_count > 0 && loop->iteration_count < 10) {
+            // Развернуть цикл — скопировать тело несколько раз
+            // Требуется сложная логика управления IR
+            printf("Unrolling loop with %d iterations\n", loop->iteration_count);
+        }
+
+        // Можно добавить распараллеливание, упрощение условий выхода и т.п.
+    }
+}
+
