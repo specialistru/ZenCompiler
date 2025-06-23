@@ -192,3 +192,54 @@ void optimizer_const_fold(IRFunction *func) {
         }
     }
 }
+
+#include "const_fold.h"
+#include <stdio.h>
+
+/**
+ * @brief Свёртывание констант: вычисляет константные выражения.
+ */
+void const_fold(IR_Function *function) {
+    if (!function) return;
+
+    printf("Constant Folding: Processing function %s\n", function->name);
+
+    for (int i = 0; i < function->instructions_count; i++) {
+        IR_Instruction *instr = &function->instructions[i];
+
+        if (instr->opcode == IR_ADD || instr->opcode == IR_SUB ||
+            instr->opcode == IR_MUL || instr->opcode == IR_DIV) {
+
+            if (instr->operand1.is_constant && instr->operand2.is_constant) {
+                int result = 0;
+                switch (instr->opcode) {
+                    case IR_ADD:
+                        result = instr->operand1.constant_value + instr->operand2.constant_value;
+                        break;
+                    case IR_SUB:
+                        result = instr->operand1.constant_value - instr->operand2.constant_value;
+                        break;
+                    case IR_MUL:
+                        result = instr->operand1.constant_value * instr->operand2.constant_value;
+                        break;
+                    case IR_DIV:
+                        if (instr->operand2.constant_value != 0)
+                            result = instr->operand1.constant_value / instr->operand2.constant_value;
+                        else
+                            continue; // Не делим на 0
+                        break;
+                    default:
+                        break;
+                }
+
+                instr->opcode = IR_LOAD_CONST;
+                instr->operand1.is_constant = true;
+                instr->operand1.constant_value = result;
+                // Очистить operand2
+                instr->operand2.is_constant = false;
+
+                printf("Folded constant expression at instruction %d: result=%d\n", i, result);
+            }
+        }
+    }
+}
