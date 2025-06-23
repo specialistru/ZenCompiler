@@ -271,3 +271,44 @@ IRNode *ir_generate_from_ast(ASTNode *ast) {
     IRGenContext ctx = {0};
     return generate_ir_block(&ctx, ast);
 }
+
+
+#include "ir_api.h"
+// Другие нужные заголовки...
+
+// Глобальный текущий IR-функция, в которую мы генерируем код
+static IRFunction *current_function = NULL;
+
+void ir_generator_start_function(const char *name) {
+    if (current_function) {
+        ir_free_function(current_function);
+    }
+    current_function = ir_create_function(name);
+}
+
+void ir_generator_finish_function() {
+    if (!current_function) return;
+    // Тут можно добавить вывод или сохранение IR
+    ir_function_print(current_function);
+    // Освобождать пока не будем, функция может быть нужна дальше
+}
+
+// Пример генерации IR инструкции — теперь через API
+void ir_generator_emit(IROpCode op, IRArg dest, bool dest_is_temp,
+                      IRArg arg1, bool arg1_is_const,
+                      IRArg arg2, bool arg2_is_const) {
+    IRInstruction *instr = ir_create_instruction(op, dest, dest_is_temp, arg1, arg1_is_const, arg2, arg2_is_const);
+    if (!instr) {
+        fprintf(stderr, "Ошибка выделения памяти для IR инструкции\n");
+        return;
+    }
+    ir_function_add_instruction(current_function, instr);
+}
+
+// Пример: генерация простой инструкции присваивания
+void ir_generator_emit_assign(IRArg dest, bool dest_is_temp, IRArg src, bool src_is_const) {
+    ir_generator_emit(IR_ASSIGN, dest, dest_is_temp, src, src_is_const, (IRArg){0}, false);
+}
+
+// ... остальной код генератора будет строиться аналогично
+
