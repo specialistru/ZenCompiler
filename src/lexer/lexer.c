@@ -1,3 +1,4 @@
+/*
 #include "lexer.h"
 #include <ctype.h>
 #include <string.h>
@@ -336,4 +337,175 @@ static void lexer_skip_comment(Lexer *lexer) {
     while (lexer->current_char != '\n' && lexer->current_char != '\0') {
         lexer_advance(lexer);
     }
+}
+*/
+
+#include "lexer.h"
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LEXEME_LEN 256
+
+// Вспомогательные функции
+
+static bool is_keyword(const char *str) {
+    // Простейший пример ключевых слов ABAP
+    static const char *keywords[] = {
+        "IF", "ELSE", "ENDIF", "LOOP", "WHILE", "DO",
+        "PERFORM", "DATA", "TYPES", "CONSTANTS",
+        "CLASS", "INTERFACE", "FUNCTION", "CALL",
+        NULL
+    };
+    for (int i = 0; keywords[i]; i++) {
+        if (strcmp(str, keywords[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Создать токен с копией лексемы
+static token_t create_token(token_type_t type, const char *lexeme, int line, int column) {
+    token_t token;
+    token.type = type;
+    token.line = line;
+    token.column = column;
+    token.lexeme = malloc(strlen(lexeme) + 1);
+    if (token.lexeme)
+        strcpy(token.lexeme, lexeme);
+    else
+        token.lexeme = NULL;
+    return token;
+}
+
+void lexer_init(lexer_t *lexer, const char *source) {
+    lexer->source = source;
+    lexer->pos = 0;
+    lexer->line = 1;
+    lexer->column = 1;
+}
+
+void token_free(token_t *token) {
+    if (token->lexeme) {
+        free(token->lexeme);
+        token->lexeme = NULL;
+    }
+}
+
+// Получаем текущий символ
+static char lexer_peek(lexer_t *lexer) {
+    return lexer->source[lexer->pos];
+}
+
+// Сдвигаем позицию вперед и возвращаем символ
+static char lexer_advance(lexer_t *lexer) {
+    char c = lexer->source[lexer->pos];
+    if (c == '\n') {
+        lexer->line++;
+        lexer->column = 1;
+    } else {
+        lexer->column++;
+    }
+    lexer->pos++;
+    return c;
+}
+
+// Пропускаем пробелы и комментарии
+static void lexer_skip_whitespace_and_comments(lexer_t *lexer) {
+    while (true) {
+        char c = lexer_peek(lexer);
+        // Пробельные символы
+        if (c == ' ' || c == '\t' || c == '\r' || c == '\n') {
+            lexer_advance(lexer);
+            continue;
+        }
+        // Комментарии в ABAP начинаются с "*"
+        if (c == '*') {
+            // Пропускаем до конца строки
+            while (lexer_peek(lexer) != '\0' && lexer_peek(lexer) != '\n') {
+                lexer_advance(lexer);
+            }
+            continue;
+        }
+        break;
+    }
+}
+
+token_t lexer_next_token(lexer_t *lexer) {
+    lexer_skip_whitespace_and_comments(lexer);
+
+    int start_pos = lexer->pos;
+    int start_line = lexer->line;
+    int start_col = lexer->column;
+
+    char c = lexer_peek(lexer);
+
+    if (c == '\0') {
+        return create_token(TOKEN_EOF, "EOF", start_line, start_col);
+    }
+
+    // Идентификаторы и ключевые слова (начинаются с буквы или _)
+    if (isalpha(c) || c == '_') {
+        char buffer[MAX_LEXEME_LEN];
+        int len = 0;
+        while (isalnum(c) || c == '_') {
+            if (len < MAX_LEXEME_LEN - 1)
+                buffer[len++] = c;
+            lexer_advance(lexer);
+            c = lexer_peek(lexer);
+        }
+        buffer[len] = '\0';
+
+        if (is_keyword(buffer)) {
+            return create_token(TOKEN_KEYWORD, buffer, start_line, start_col);
+        }
+        return create_token(TOKEN_IDENTIFIER, buffer, start_line, start_col);
+    }
+
+    // Числа (целые и десятичные)
+    if (isdigit(c)) {
+        char buffer[MAX_LEXEME_LEN];
+        int len = 0;
+        bool has_dot = false;
+        while (isdigit(c) || (!has_dot && c == '.')) {
+            if (c == '.')
+                has_dot = true;
+            if (len < MAX_LEXEME_LEN - 1)
+                buffer[len++] = c;
+            lexer_advance(lexer);
+            c = lexer_peek(lexer);
+        }
+        buffer[len] = '\0';
+        return create_token(TOKEN_NUMBER, buffer, start_line, start_col);
+    }
+
+    // Строковые литералы в ABAP обрамлены одинарными кавычками
+    if (c == '\'') {
+        lexer_advance(lexer); // пропускаем открывающую кавычку
+        char buffer[MAX_LEXEME_LEN];
+        int len = 0;
+        c = lexer_peek(lexer);
+        while (c != '\'' && c != '\0' && len < MAX_LEXEME_LEN - 1) {
+            buffer[len++] = c;
+            lexer_advance(lexer);
+            c = lexer_peek(lexer);
+        }
+        buffer[len] = '\0';
+
+        if (c == '\'') {
+            lexer_advance(lexer); // пропускаем закрывающую кавычку
+            return create_token(TOKEN_STRING, buffer, start_line, start_col);
+        } else {
+            // Ошибка: не закрытая строка
+            return create_token(TOKEN_UNKNOWN, "Unterminated string literal", start_line, start_col);
+        }
+    }
+
+    // Операторы и спецсимволы
+    // Для простоты рассматриваем однобайтовые символы: + - * / = < > ( ) , ; .
+    // В ABAP есть и более сложные, но для начала этого достаточно
+    char op_str[2] = { c, '\0' };
+    lexer_advance(lexer);
+    return create_token(TOKEN_OPERATOR, op_str, start_line, start_col);
 }
